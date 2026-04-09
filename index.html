@@ -217,6 +217,10 @@
 
 <p class="dica">Se o produto já existir, a quantidade será somada automaticamente e ficará salva no navegador.</p>
 
+<div style="margin-bottom:20px; display:flex; justify-content:center;">
+  <input type="text" id="pesquisa" placeholder="🔍 Pesquisar produto ou categoria" oninput="filtrarProdutos()" style="max-width:420px; width:100%;">
+</div>
+
 <table>
   <thead>
     <tr>
@@ -307,17 +311,21 @@
       });
     }
 
-    function atualizarTabela(salvar = true) {
+    function atualizarTabela(salvar = true, filtro = '') {
       const tabela = document.getElementById('tabelaEstoque');
       tabela.innerHTML = '';
-      
-      estoque.sort((a, b) => 
-  a.produto.localeCompare(b.produto, 'pt-BR', { sensitivity: 'base' })
-);
 
       let valorTotal = 0;
 
       estoque.forEach((item, indice) => {
+        if (
+          filtro &&
+          !item.produto.toLowerCase().includes(filtro) &&
+          !item.categoria.toLowerCase().includes(filtro)
+        ) {
+          return;
+        }
+
         const valorItem = item.quantidade * item.preco;
         valorTotal += valorItem;
 
@@ -334,15 +342,15 @@
           <td>R$ ${item.preco.toFixed(2).replace('.', ',')}</td>
           <td>R$ ${valorItem.toFixed(2).replace('.', ',')}</td>
           <td>
-            <button class="btn-remover" onclick="removerProduto(${indice})">Excluir produto(s)</button>
+            <button class="btn-remover" onclick="removerProduto(${indice})">Remover</button>
           </td>
           <td>
             <input type="number" min="1" id="mais-${indice}" placeholder="Qtd" style="width:70px; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:#1e293b; color:white; margin-bottom:6px;">
-            <button class="btn-adicionar" style="width:100%;" onclick="adicionarMais(${indice})">Adicionar produto(s)</button>
+            <button class="btn-adicionar" style="width:100%;" onclick="adicionarMais(${indice})">+ Salvar</button>
           </td>
           <td>
             <input type="number" min="1" id="menos-${indice}" placeholder="Qtd" style="width:70px; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:#1e293b; color:white; margin-bottom:6px;">
-            <button class="btn-remover" style="width:100%;" onclick="retirarQuantidade(${indice})">Retirar produto(s)</button>
+            <button class="btn-remover" style="width:100%;" onclick="retirarQuantidade(${indice})">- Salvar</button>
           </td>
         `;
 
@@ -461,6 +469,11 @@
       URL.revokeObjectURL(url);
     }
 
+    function filtrarProdutos() {
+      const filtro = document.getElementById('pesquisa').value.toLowerCase();
+      atualizarTabela(false, filtro);
+    }
+
     function importarEstoque(event) {
       const arquivo = event.target.files[0];
 
@@ -493,7 +506,16 @@
     window.retirarQuantidade = retirarQuantidade;
     window.limparEstoque = limparEstoque;
     window.exportarEstoque = exportarEstoque;
+    
+
+    window.adicionarProduto = adicionarProduto;
+    window.removerProduto = removerProduto;
+    window.adicionarMais = adicionarMais;
+    window.retirarQuantidade = retirarQuantidade;
+    window.limparEstoque = limparEstoque;
+    window.exportarEstoque = exportarEstoque;
     window.importarEstoque = importarEstoque;
+    window.filtrarProdutos = filtrarProdutos;
 
     carregarEstoque();
   </script></body>
