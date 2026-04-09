@@ -342,15 +342,15 @@
           <td>R$ ${item.preco.toFixed(2).replace('.', ',')}</td>
           <td>R$ ${valorItem.toFixed(2).replace('.', ',')}</td>
           <td>
-            <button class="btn-remover" onclick="removerProduto(${indice})">Remover</button>
+            <button class="btn-remover" onclick="removerProduto(${indice})">Excluir Produto(s)</button>
           </td>
           <td>
             <input type="number" min="1" id="mais-${indice}" placeholder="Qtd" style="width:70px; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:#1e293b; color:white; margin-bottom:6px;">
-            <button class="btn-adicionar" style="width:100%;" onclick="adicionarMais(${indice})">+ Salvar</button>
+            <button class="btn-adicionar" style="width:100%;" onclick="adicionarMais(${indice})">Adicionar Produto(s)</button>
           </td>
           <td>
             <input type="number" min="1" id="menos-${indice}" placeholder="Qtd" style="width:70px; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:#1e293b; color:white; margin-bottom:6px;">
-            <button class="btn-remover" style="width:100%;" onclick="retirarQuantidade(${indice})">- Salvar</button>
+            <button class="btn-remover" style="width:100%;" onclick="retirarQuantidade(${indice})">Retirar Produto(s)</button>
           </td>
         `;
 
