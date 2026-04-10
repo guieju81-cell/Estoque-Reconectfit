@@ -312,8 +312,12 @@
     }
 
     function atualizarTabela(salvar = true, filtro = '') {
-      const tabela = document.getElementById('tabelaEstoque');
-      tabela.innerHTML = '';
+  const tabela = document.getElementById('tabelaEstoque');
+  tabela.innerHTML = '';
+
+  estoque.sort((a, b) =>
+    a.produto.localeCompare(b.produto, 'pt-BR', { sensitivity: 'base' })
+  );
 
       let valorTotal = 0;
 
