@@ -260,6 +260,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBFYq-t3NAp8_O9bZBqULdyAYD-aOKaipQ",
@@ -276,6 +277,7 @@
     getAnalytics(app);
 
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
     let estoque = [];
 
@@ -521,6 +523,13 @@
     window.importarEstoque = importarEstoque;
     window.filtrarProdutos = filtrarProdutos;
 
+    signInAnonymously(auth)
+  .then(() => {
+    console.log("Logado automaticamente");
     carregarEstoque();
+  })
+  .catch((error) => {
+    console.error("Erro no login:", error);
+  });
   </script></body>
 </html>
