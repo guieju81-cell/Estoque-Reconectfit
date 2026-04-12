@@ -213,11 +213,12 @@
   <div class="container">
     <h1>⚡ Estoque ReconectFit</h1>
     <p class="subtitulo">Gerencie produtos, suplementos, roupas e equipamentos da sua academia</p><div class="formulario">
+      <h2 style="margin-top:20px;">📦 Registrar Produto</h2>
   <input type="text" id="produto" placeholder="Nome do produto">
   <input type="number" id="quantidade" placeholder="Quantidade" min="0">
   <input type="number" id="preco" placeholder="Preço (R$)" min="0" step="0.01">
   <input type="text" id="categoria" placeholder="Categoria">
-  <button class="btn-adicionar" onclick="adicionarProduto()">Adicionar Produto</button>
+  <button class="btn-adicionar" onclick="adicionarProduto()">Registrar Produto</button>
 </div>
 
 <p class="dica">Se o produto já existir, a quantidade será somada automaticamente e ficará salva no navegador.</p>
@@ -253,18 +254,47 @@
     <span id="valorTotal">R$ 0,00</span>
   </div>
 </div>
+    
+    <h2 style="margin-top:20px;">🧾 Registrar Venda</h2>
+    <div class="formulario">
+  <input type="text" id="cliente" placeholder="Nome do cliente">
+  <input type="text" id="vendedor" placeholder="Quem vendeu">
+  <input type="text" id="produtoVenda" placeholder="Produto">
+  <input type="number" id="quantidadeVenda" placeholder="Quantidade">
 
-<div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:25px;">
+ <button class="btn-adicionar" onclick="registrarVenda()">
+  Registrar Venda
+</button>
+</div>
+    
+    <h3 style="margin-top:30px;">📊 Histórico de Vendas</h3>
+    <table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Vendedor</th>
+      <th>Cliente</th>
+      <th>Produto</th>
+      <th>Quantidade</th>
+      <th>Preço Unitário</th>
+      <th>Preço Total</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="tabelaHistorico"></tbody>
+</table>
+
+  </div>  
+   <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:25px;">
   <button class="btn-limpar" onclick="limparEstoque()" style="flex:1; margin-top:0;">Apagar Todo o Estoque</button>
   <button class="btn-adicionar" onclick="exportarEstoque()" style="flex:1;">Salvar Estoque em Arquivo</button>
   <button class="btn-adicionar" onclick="document.getElementById('importarArquivo').click()" style="flex:1; background:linear-gradient(135deg,#0ea5e9,#2563eb);">Carregar Estoque</button>
   <input type="file" id="importarArquivo" accept=".json" style="display:none;" onchange="importarEstoque(event)">
 </div>
-
-  </div>  <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -414,6 +444,50 @@
 
       atualizarTabela();
     }
+  function registrarVenda() {
+  const cliente = document.getElementById('cliente').value;
+  const vendedor = document.getElementById('vendedor').value;
+  const produtoNome = document.getElementById('produtoVenda').value;
+  const quantidade = parseInt(document.getElementById('quantidadeVenda').value);
+
+  console.log(cliente, vendedor, produtoNome, quantidade);
+
+  if (!cliente || !vendedor || !produtoNome || isNaN(quantidade)) {
+    alert("Preencha todos os campos");
+    return;
+  }
+
+  const produto = estoque.find(p =>
+    p.produto.toLowerCase() === produtoNome.toLowerCase()
+  );
+
+  if (!produto) {
+    alert('Produto não encontrado');
+    return;
+  }
+
+  if (quantidade > produto.quantidade) {
+    alert('Estoque insuficiente');
+    return;
+  }
+
+  // baixa no estoque
+  produto.quantidade -= quantidade;
+
+  const venda = {
+    cliente,
+    vendedor,
+    produto: produto.produto,
+    quantidade,
+    preco: produto.preco,
+    data: new Date().toLocaleString()
+  };
+
+  // salva no Firebase
+  push(ref(db, 'vendas'), venda);
+
+  atualizarTabela();
+}
 
     function removerProduto(indice) {
       estoque.splice(indice, 1);
@@ -519,13 +593,61 @@
 
       leitor.readAsText(arquivo);
     }
+  function carregarHistorico() {
+  onValue(ref(db, 'vendas'), (snapshot) => {
+    const dados = snapshot.val();
+    const tabela = document.getElementById('tabelaHistorico');
+    tabela.innerHTML = '';
 
-    window.adicionarProduto = adicionarProduto;
-    window.removerProduto = removerProduto;
-    window.adicionarMais = adicionarMais;
-    window.retirarQuantidade = retirarQuantidade;
-    window.limparEstoque = limparEstoque;
-    window.exportarEstoque = exportarEstoque;
+    if (!dados) return;
+
+    Object.entries(dados).forEach(([id, venda]) => {
+      const linha = document.createElement('tr');
+
+      const total = venda.quantidade * venda.preco;
+
+linha.innerHTML = `
+  <td>${venda.data}</td>
+  <td>${venda.vendedor}</td>
+  <td>${venda.cliente}</td>
+  <td>${venda.produto}</td>
+  <td>${venda.quantidade}</td>
+  <td>R$ ${venda.preco}</td>
+  <td>R$ ${total.toFixed(2)}</td>
+  <td>
+    <button class="btn-remover" onclick="excluirVenda('${id}')">
+      Excluir Informação
+    </button>
+  </td>
+`;
+
+      tabela.appendChild(linha);
+    });
+  });
+}
+      function excluirVenda(id) {
+  if (confirm("Deseja excluir essa venda?")) {
+    remove(ref(db, 'vendas/' + id));
+  }
+}
+  let indiceParaExcluir = null;
+
+function abrirModal(indice) {
+  indiceParaExcluir = indice;
+  document.getElementById('modalConfirmar').style.display = 'flex';
+}
+
+function fecharModal() {
+  indiceParaExcluir = null;
+  document.getElementById('modalConfirmar').style.display = 'none';
+}
+
+function confirmarExclusao() {
+  if (indiceParaExcluir !== null) {
+    removerProduto(indiceParaExcluir);
+  }
+  fecharModal();
+}
     window.adicionarProduto = adicionarProduto;
     window.removerProduto = removerProduto;
     window.adicionarMais = adicionarMais;
@@ -535,14 +657,41 @@
     window.importarEstoque = importarEstoque;
     window.filtrarProdutos = filtrarProdutos;
     window.verificarSenha = verificarSenha;
-    
+    window.registrarVenda = registrarVenda;
+    window.carregarHistorico = carregarHistorico;
+    window.excluirVenda = excluirVenda;
+
     signInAnonymously(auth)
   .then(() => {
     console.log("Logado automaticamente");
     carregarEstoque();
+    carregarHistorico();
   })
   .catch((error) => {
     console.error("Erro no login:", error);
   });
-  </script></body>
+  
+  </script>
+  <div id="modalConfirmar" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#1e293b; padding:25px; border-radius:20px; text-align:center; width:300px; border:1px solid rgba(255,255,255,0.1);">
+    
+    <h3 style="margin-bottom:15px; color:white;">
+      Tem certeza que deseja excluir?
+    </h3>
+
+    <div style="display:flex; gap:10px;">
+      <button onclick="confirmarExclusao()" 
+        style="flex:1; background:#ef4444; color:white; padding:10px; border:none; border-radius:10px;">
+        Sim
+      </button>
+
+      <button onclick="fecharModal()" 
+        style="flex:1; background:#334155; color:white; padding:10px; border:none; border-radius:10px;">
+        Não
+      </button>
+    </div>
+
+  </div>
+</div>
+</body>
 </html>
