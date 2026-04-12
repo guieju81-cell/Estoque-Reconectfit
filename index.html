@@ -205,6 +205,11 @@
     }
   </style></head>
 <body>
+  <div id="loginTela" style="position:fixed; inset:0; background:#0f172a; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:9999;">
+  <h2 style="color:white; margin-bottom:10px;">Digite a senha</h2>
+  <input type="password" id="senha" placeholder="Senha" style="padding:10px; border-radius:10px; border:none;">
+  <button onclick="verificarSenha()" style="margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#22c55e; color:white;">Entrar</button>
+</div>
   <div class="container">
     <h1>⚡ Estoque ReconectFit</h1>
     <p class="subtitulo">Gerencie produtos, suplementos, roupas e equipamentos da sua academia</p><div class="formulario">
@@ -479,6 +484,15 @@
       const filtro = document.getElementById('pesquisa').value.toLowerCase();
       atualizarTabela(false, filtro);
     }
+  function verificarSenha() {
+  const senha = document.getElementById('senha').value;
+
+  if (senha === "Pandora") {
+    document.getElementById('loginTela').style.display = 'none';
+  } else {
+    alert('Senha incorreta');
+  }
+}
 
     function importarEstoque(event) {
       const arquivo = event.target.files[0];
