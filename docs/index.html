@@ -1,8 +1,10 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Estoque</title>  <style>
+  <title>Controle de Estoque</title>
+  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -203,10 +205,44 @@
         overflow-x: auto;
       }
     }
-  </style></head>
+  @media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #tabelaHistorico, #tabelaHistorico * {
+    visibility: visible;
+  }
+
+  #tabelaHistorico {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80mm;
+    font-size: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border-bottom: 1px dashed black;
+    padding: 4px;
+    color: black;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+  </style>
+</head>
 <body>
   <div id="loginTela" style="position:fixed; inset:0; background:#0f172a; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:9999;">
-  <h2 style="color:white; margin-bottom:10px;">Digite a senha</h2>
+    <h1>⚡ Estoque ReconectFit</h1>
+  <h3 style="color:white; margin-bottom:10px;">Digite a senha</h3>
   <input type="password" id="senha" placeholder="Senha" style="padding:10px; border-radius:10px; border:none;">
   <button onclick="verificarSenha()" style="margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#22c55e; color:white;">Entrar</button>
 </div>
@@ -268,6 +304,9 @@
 </div>
     
     <h3 style="margin-top:30px;">📊 Histórico de Vendas</h3>
+    <button class="btn-adicionar" onclick="imprimirHistorico()" style="margin-bottom:10px;">
+  🖨️ Imprimir Histórico
+</button>
     <table>
   <thead>
     <tr>
@@ -625,6 +664,60 @@ linha.innerHTML = `
     });
   });
 }
+  function imprimirHistorico() {
+  let conteudo = `
+    <html>
+      <head>
+        <title>Histórico de Vendas</title>
+        <style>
+          body {
+            font-family: monospace;
+            width: 80mm;
+          }
+          h2 {
+            text-align: center;
+          }
+          p {
+            margin: 4px 0;
+            font-size: 12px;
+          }
+          hr {
+            border: none;
+            border-top: 1px dashed black;
+            margin: 8px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Histórico</h2>
+  `;
+
+  const linhas = document.querySelectorAll('#tabelaHistorico tr');
+
+  linhas.forEach(linha => {
+    const colunas = linha.querySelectorAll('td');
+
+    conteudo += `
+      <p><b>Data:</b> ${colunas[0].innerText}</p>
+      <p><b>Vendedor:</b> ${colunas[1].innerText}</p>
+      <p><b>Cliente:</b> ${colunas[2].innerText}</p>
+      <p><b>Produto:</b> ${colunas[3].innerText}</p>
+      <p><b>Qtd:</b> ${colunas[4].innerText}</p>
+      <p><b>Preço:</b> ${colunas[5].innerText}</p>
+      <hr>
+    `;
+  });
+
+  conteudo += `
+      </body>
+    </html>
+  `;
+
+  const janela = window.open('', '', 'width=300,height=600');
+  janela.document.write(conteudo);
+  janela.document.close();
+  janela.print();
+}
       function excluirVenda(id) {
   if (confirm("Deseja excluir essa venda?")) {
     remove(ref(db, 'vendas/' + id));
@@ -660,6 +753,7 @@ function confirmarExclusao() {
     window.registrarVenda = registrarVenda;
     window.carregarHistorico = carregarHistorico;
     window.excluirVenda = excluirVenda;
+    window.imprimirHistorico = imprimirHistorico;
 
     signInAnonymously(auth)
   .then(() => {
