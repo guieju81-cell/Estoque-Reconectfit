@@ -205,45 +205,6 @@
         overflow-x: auto;
       }
     }
- @media print {
-  @page {
-    size: 80mm auto; /* largura fixa, altura automática */
-    margin: 0;
-  }
-
-  html, body {
-    width: 80mm;
-    margin: 0;
-    padding: 0;
-  }
-
-  body * {
-    visibility: hidden;
-  }
-
-  #tabelaHistorico, #tabelaHistorico * {
-    visibility: visible;
-  }
-
-  #tabelaHistorico {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 80mm;
-    font-size: 12px;
-    color: black;
-    background: white;
-  }
-
-  th, td {
-    border-bottom: 1px dashed black;
-    padding: 4px;
-  }
-
-  th {
-    font-weight: bold;
-  }
- }
   </style>
 </head>
 <body>
@@ -311,7 +272,7 @@
 </div>
     
     <h3 style="margin-top:30px;">📊 Histórico de Vendas</h3>
-    <button class="btn-adicionar" onclick="imprimirHistorico()" style="margin-bottom:10px;">
+    <button class="btn-adicionar" onclick="imprimirHistorico()">
   🖨️ Imprimir Histórico
 </button>
     <table>
@@ -674,29 +635,34 @@ linha.innerHTML = `
   function imprimirHistorico() {
   let conteudo = `
     <html>
-      <head>
-        <title>Histórico de Vendas</title>
-        <style>
-          body {
-            font-family: monospace;
-            width: 80mm;
-          }
-          h2 {
-            text-align: center;
-          }
-          p {
-            margin: 4px 0;
-            font-size: 12px;
-          }
-          hr {
-            border: none;
-            border-top: 1px dashed black;
-            margin: 8px 0;
-          }
-        </style>
-      </head>
-      <body>
-        <h2>Histórico</h2>
+    <head>
+      <title>Histórico</title>
+      <style>
+        body {
+          font-family: monospace;
+          width: 80mm;
+          margin: 0;
+          padding: 5px;
+        }
+        h2 {
+          text-align: center;
+          font-size: 14px;
+        }
+        p {
+          margin: 2px 0;
+          font-size: 12px;
+        }
+        hr {
+          border: none;
+          border-top: 1px dashed black;
+          margin: 5px 0;
+        }
+      </style>
+    </head>
+    <body>
+      <h2>ReconectFit</h2>
+      <p style="text-align:center;">Histórico de Vendas</p>
+      <hr>
   `;
 
   const linhas = document.querySelectorAll('#tabelaHistorico tr');
@@ -705,25 +671,21 @@ linha.innerHTML = `
     const colunas = linha.querySelectorAll('td');
 
     conteudo += `
-      <p><b>Data:</b> ${colunas[0].innerText}</p>
-      <p><b>Vendedor:</b> ${colunas[1].innerText}</p>
-      <p><b>Cliente:</b> ${colunas[2].innerText}</p>
-      <p><b>Produto:</b> ${colunas[3].innerText}</p>
-      <p><b>Qtd:</b> ${colunas[4].innerText}</p>
-      <p><b>Preço:</b> ${colunas[5].innerText}</p>
+      <p>Data: ${colunas[0].innerText}</p>
+      <p>Cliente: ${colunas[2].innerText}</p>
+      <p>Produto: ${colunas[3].innerText}</p>
+      <p>Qtd: ${colunas[4].innerText}</p>
+      <p>Preço: R$ ${colunas[5].innerText}</p>
       <hr>
     `;
   });
 
-  conteudo += `
-      </body>
-    </html>
-  `;
+  conteudo += `</body></html>`;
 
-  const janela = window.open('', '', 'width=300,height=600');
-  janela.document.write(conteudo);
-  janela.document.close();
-  janela.print();
+  const win = window.open('', '', 'width=300,height=600');
+  win.document.write(conteudo);
+  win.document.close();
+  win.print();
 }
       function excluirVenda(id) {
   if (confirm("Deseja excluir essa venda?")) {
