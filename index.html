@@ -496,31 +496,40 @@
   atualizarTabela();
 }
   function cancelarVenda(id, venda) {
-  if (!confirm("Cancelar essa venda?")) return;
-
-  let produto = estoque.find(p =>
-    p.produto.toLowerCase() === venda.produto.toLowerCase()
+  const opcao = prompt(
+    "Digite:\n1 = Só excluir\n2 = Devolver ao estoque e excluir"
   );
 
-  if (produto) {
-    // já existe → soma
-    produto.quantidade += venda.quantidade;
-  } else {
-    // não existe → recria
-    estoque.push({
-      produto: venda.produto,
-      quantidade: venda.quantidade,
-      preco: venda.preco,
-      categoria: "Retornado"
-    });
+  if (opcao === "1") {
+    // só remove
+    remove(ref(db, 'vendas/' + id));
   }
 
-  // remove do histórico
-  remove(ref(db, 'vendas/' + id));
+  else if (opcao === "2") {
+    // devolve pro estoque
+    let produto = estoque.find(p =>
+      p.produto.toLowerCase() === venda.produto.toLowerCase()
+    );
 
-  atualizarTabela();
-}
+    if (produto) {
+      produto.quantidade += venda.quantidade;
+    } else {
+      estoque.push({
+        produto: venda.produto,
+        quantidade: venda.quantidade,
+        preco: venda.preco,
+        categoria: "Retornado"
+      });
+    }
 
+    remove(ref(db, 'vendas/' + id));
+    atualizarTabela();
+  }
+
+  else {
+    alert("Opção inválida");
+  }
+  }
     function removerProduto(indice) {
       estoque.splice(indice, 1);
       atualizarTabela();
